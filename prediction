@@ -1,0 +1,48 @@
+import pandas as pd
+import plotly.express as px
+
+mexico_city1 = pd.read_csv("./data/mexico-city-real-estate-1.csv")
+mexico_city1 = mexico_city1.drop(
+    ["floor", "price_usd_per_m2", "expenses", "rooms"], axis=1
+)
+mexico_city1 = mexico_city1.dropna(axis=0)
+mexico_city1[
+    ["First Empty", "Country", "City", "Borough", "Second Empty"]
+] = mexico_city1["place_with_parent_names"].str.split("|", 4, expand=True)
+mexico_city1 = mexico_city1.drop(["First Empty", "Second Empty"], axis=1)
+mexico_city1_subset = mexico_city1.loc[1:50]
+fig = px.scatter_3d(
+    mexico_city1_subset,
+    x="Borough",
+    y="surface_covered_in_m2",
+    z="price",
+    symbol="property_type",
+    color="property_type",
+    labels={
+        "surface_covered_in_m2": "Surface Covered in m^2",
+        "price": "Price",
+        "property_type": "Property Type",
+    },
+)
+
+fig.show()
+
+from category_encoders import OneHotEncoder
+
+# Instantiate transformer
+ohe = OneHotEncoder()
+
+# Fit transformer to data
+ohe.fit(mexico_city1)
+
+# Transform data
+df_ohe = ohe.transform(mexico_city1)
+
+df_ohe.head()
+
+#Predicting my house price based on surface_covered_in_m2 
+target feature = ["price_usd"]
+y=["price_usd"]
+x=[["surface_covered_in_m2]]
+lr=LinearRegression()
+lr.fit(x,y)
